@@ -1199,3 +1199,20 @@ func FormatCloseMessage(closeCode int, text string) []byte {
 	copy(buf[2:], text)
 	return buf
 }
+
+
+func (c *Conn) Read(p []byte) (int, error) {
+	_, r, e := c.NextReader()
+	if e != nil {
+		return 0, e
+	}
+	return r.Read(p)
+}
+
+func (c *Conn) Write(p []byte) (int, error) {
+	wc, e := c.NextWriter(BinaryMessage)
+	if e != nil {
+		return 0, e
+	}
+	return wc.Write(p)
+}
