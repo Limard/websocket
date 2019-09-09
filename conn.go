@@ -1200,7 +1200,6 @@ func FormatCloseMessage(closeCode int, text string) []byte {
 	return buf
 }
 
-
 func (c *Conn) Read(p []byte) (int, error) {
 	_, r, e := c.NextReader()
 	if e != nil {
@@ -1209,10 +1208,11 @@ func (c *Conn) Read(p []byte) (int, error) {
 	return r.Read(p)
 }
 
-func (c *Conn) Write(p []byte) (int, error) {
-	wc, e := c.NextWriter(BinaryMessage)
+func (c *Conn) Write(p []byte) (n int, e error) {
+	e = c.WriteMessage(TextMessage, p)
 	if e != nil {
-		return 0, e
+		return
 	}
-	return wc.Write(p)
+	n = len(p)
+	return
 }
