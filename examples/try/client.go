@@ -9,8 +9,7 @@ import (
 
 func main() {
 	fmt.Println("dial")
-	//url_ :=`ws://192.168.137.174:28080/EsmatWeb/socketServer.do`
-	url_ := `ws://192.168.70.1:7878/echo`
+	url_ := `ws://127.0.0.1:7878/`
 	c, _, e := websocket.DefaultDialer.Dial(url_, nil)
 	if e != nil {
 		panic(e)
