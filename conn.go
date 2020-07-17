@@ -6,6 +6,7 @@ package websocket
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -1200,16 +1201,36 @@ func FormatCloseMessage(closeCode int, text string) []byte {
 	return buf
 }
 
-func (c *Conn) Read(p []byte) (int, error) {
-	_, r, e := c.NextReader()
-	if e != nil {
-		return 0, e
-	}
-	return r.Read(p)
+type ConnIO struct {
+	*Conn
+	cacheR io.Reader
 }
 
-func (c *Conn) Write(p []byte) (n int, e error) {
-	e = c.WriteMessage(TextMessage, p)
+func NewConnIO(c *Conn) *ConnIO {
+	return &ConnIO{
+		Conn:   c,
+		cacheR: nil,
+	}
+}
+
+func (t *ConnIO) Read(p []byte) (n int, e error) {
+	if t.cacheR == nil {
+		_, buf, e := t.ReadMessage()
+		if e != nil {
+			return 0, e
+		}
+		t.cacheR = bytes.NewReader(buf)
+	}
+
+	n, e = t.cacheR.Read(p)
+	if e == io.EOF {
+		t.cacheR = nil
+	}
+	return
+}
+
+func (t *ConnIO) Write(p []byte) (n int, e error) {
+	e = t.WriteMessage(TextMessage, p)
 	if e != nil {
 		return
 	}
