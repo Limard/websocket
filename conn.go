@@ -1223,8 +1223,9 @@ func (t *ConnIO) Read(p []byte) (n int, e error) {
 	}
 
 	n, e = t.cacheR.Read(p)
-	if e == io.EOF {
+	if n == 0 || e == io.EOF {
 		t.cacheR = nil
+		e = nil
 	}
 	return
 }
